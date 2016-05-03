@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+#info {
+  position: absolute;
+  top: 2%;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+body {
+  overflow: hidden;
+}
+
+</style>
+</head>
+
+<body> 
+<div id="info">
+<br>
+<br>
+<button id="walkDance" style="width:20%">Walk/Dance</button>
+<button id="view" style="width:20%">view</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script>
+	var scene, renderer, camera;
+var controls;
+var all;
+var body;
+var bodyToArmL,armToHandL;
+var bodyToArm,armToHand;
+var bodyToLeftLeg,bodyToRightLeg;;
+var bodyToRightLid,bodyToLeftLid,bodyToBackwardLid, 	bodyToForwardLid;
+var clock = new THREE.Clock();
+var period = 2;
+var turn = false;
+var turn1 = false;
+var angle = 0;
+$("#walkDance").click(function() {
+  turn = !turn;
+  if(turn) body.position.x =0;
+  else body.position.x = -50;
+});
+
+$("#view").click(function() {
+  turn1 = !turn1;
+});
+
+var pose1 = {
+		bodyToHead: -0.024555197169909504,
+    bodyToArmL: -0.0368327957548642,
+    leftJoint: -0.04479242534595773,
+    bodyToArm: -0.10186244927687027,
+    rightJoint: -0.04479242534595773,
+    bodyToLeftLeg: -0.0014393229979537403,
+    bodyToRightLeg: -0.0014393229979537403,
+    posi:0
+};
+
+var pose2 = {
+    bodyToHead: -0.024555197169909504,
+    bodyToArmL: -0.0368327957548642,
+    leftJoint: -0.011514583983629922,
+    bodyToArm: -1.5,
+    rightJoint: 1.5491971005445144,
+    bodyToLeftLeg: -0.5,
+    bodyToRightLeg: -0.0014393229979537403,
+    posi:20
+};
+
+var pose3 = {
+  	bodyToHead: -0.024555197169909504,
+    bodyToArmL: -0.0368327957548642,
+    leftJoint: -0.04479242534595773,
+    bodyToArm: -0.10186244927687027,
+    rightJoint: -0.04479242534595773,
+    bodyToLeftLeg: -0.0014393229979537403,
+    bodyToRightLeg: -0.0014393229979537403,
+    posi:0
+};
+
+var pose4 = {
+    bodyToHead: -0.024555197169909504,
+    bodyToArmL: 1.5,
+    leftJoint: -1.3121076544237509,
+    bodyToArm: -0.004317968993861276,
+    rightJoint: -0.011514583983629922,
+    bodyToLeftLeg: -0.023115874171955764,
+    bodyToRightLeg: 0.5187979051780944,
+    posi:-20
+ 
+};
+
+var pose5w ={
+    bodyToHead: -0.024555197169909504,
+    bodyToArmL: -0.6871293309749247,
+    leftJoint: 0.7843356570596192,
+    bodyToArm: 0.45088960566018077,
+    rightJoint: 0.7843356570596192,
+    bodyToLeftLeg: -0.06646897651995981,
+    bodyToRightLeg: -0.5
+};
+
+var pose6w ={
+     bodyToHead: -0.024555197169909504,
+     bodyToArmL: 0.45088960566018077,
+     leftJoint: 0.7843356570596192,
+     bodyToArm: -1.1098220788679638,
+     rightJoint: 0.7843356570596192,
+     bodyToLeftLeg: -0.5,
+     bodyToRightLeg: -0.030115874171955764
+};
+
+var pose7w ={
+     bodyToHead: -0.024555197169909504,
+     bodyToArmL: -0.2319217563208824,
+     leftJoint: 0.7843356570596192,
+     bodyToArm: -0.13437727603787342,
+     rightJoint: 0.7843356570596192,
+     bodyToLeftLeg: -0.023115874171955764,
+     bodyToRightLeg: -0.023115874171955764
+};
+
+var keys = [{s: 0,pose: pose1}, 
+						{s: 0.17,pose: pose2},{s: 0.34,pose: pose3}, 
+            {s: 0.51,pose: pose4},{s: 0.85,pose: pose2}, 
+						{s: 1,pose: pose1}];
+            
+var wKeys = [{s:0,pose: pose5w}, {s: 0.25,pose: pose7w},{s: 0.5,pose: pose6w},{s: 0.75,pose: pose7w},{s:1,pose: pose5w}];            
+            
+init();
+animate();
+
+function init() {
+	scene = new THREE.Scene();
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+  document.body.appendChild(renderer.domElement);
+	camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.set(0,50,100);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+	var light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(150, 150, 150);
+  scene.add(light);
+  var light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(-150, -150, -150);
+  scene.add(light);
+  var amblight = new THREE.AmbientLight(0x404040); // soft white light
+  scene.add(amblight);
+  var gridXZ = new THREE.GridHelper(100, 10);
+  gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
+  scene.add(gridXZ);
+  
+  THREE.ImageUtils.crossOrigin = '';
+  meterial_colorwithbor = new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')});
+	
+  all = new THREE.Object3D();
+	body = Body();
+  body.position.set(-50,25,0);
+  all.add(body);
+  scene.add(all);
+
+  var head = Head();
+  bodyToHead = new THREE.Object3D();
+  bodyToHead.position.set(0, 15, 0);
+  body.add(bodyToHead);
+  bodyToHead.add(head);
+  
+  var leftLeg = Leg();
+  bodyToLeftLeg = new THREE.Object3D();
+  bodyToLeftLeg.position.set(-3, -13.5, 0);
+  leftLeg.position.set(0,-5,0);
+  bodyToLeftLeg.add(leftLeg);
+  body.add(bodyToLeftLeg);
+  
+  var rightLeg = Leg();
+  bodyToRightLeg = new THREE.Object3D();
+  bodyToRightLeg.position.set(3, -13.5, 0);
+  rightLeg.position.set(0,-5,0);
+  bodyToRightLeg.add(rightLeg);
+  body.add(bodyToRightLeg);
+
+  var lidForward = LidFB();
+  bodyToForwardLid = new THREE.Object3D();
+  bodyToForwardLid.position.set(0,-10,6);
+  lidForward.position.set(0,-2,0);
+  bodyToForwardLid.add(lidForward);
+  bodyToForwardLid.rotation.x = -Math.PI/12;  		
+  body.add(bodyToForwardLid);
+
+  var lidBackward = LidFB();
+  bodyToBackwardLid = new THREE.Object3D();
+  bodyToBackwardLid.position.set(0,-10,-6);
+  lidBackward.position.set(0,-2,0);
+  bodyToBackwardLid.add(lidBackward);
+  bodyToBackwardLid.rotation.x = Math.PI/12;  		
+  body.add(bodyToBackwardLid);
+
+  var lidLeft = LidRL();
+  bodyToLeftLid = new THREE.Object3D();
+  bodyToLeftLid.position.set(-6,-10, 0);
+  lidLeft.position.set(0,-2,0);
+  bodyToLeftLid.add(lidLeft);
+  bodyToLeftLid.rotation.z = -Math.PI/12;  		
+  body.add(bodyToLeftLid);
+
+  var lidRight = LidRL();
+  bodyToRightLid = new THREE.Object3D();
+  bodyToRightLid.position.set(6,-10, 0);
+  lidRight.position.set(0,-2,0);
+  bodyToRightLid.add(lidRight);
+  bodyToRightLid.rotation.z = Math.PI/12;  		
+  body.add(bodyToRightLid);
+  
+  rightJoint = handMoveJoint();
+  var rightHand = Hand();
+  bodyToArm =new THREE.Object3D();
+  bodyToArm.add(rightJoint);
+  bodyToArm.position.set(6,3,0);
+  armToHand =new THREE.Object3D();
+  rightJoint.add(armToHand);
+  armToHand.position.set(7,0,0);
+  armToHand.add(rightHand);
+  body.add(bodyToArm);
+  
+  leftJoint = handMoveJoint();
+  var leftHand = Hand();
+  bodyToArmL =new THREE.Object3D();
+  bodyToArmL.add(leftJoint);
+  bodyToArmL.position.set(-6,3,0);
+  armToHandL =new THREE.Object3D();
+  leftJoint.add(armToHandL);
+  armToHandL.position.set(-7,0,0);
+  armToHandL.add(leftHand);
+  body.add(bodyToArmL);
+}
+
+function Body(){
+  var materials = [];
+  // must give 6 materials for box geometry
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  materials.push(new THREE.MeshLambertMaterial({visible:false}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/1GIqcsD.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/Iw2qR7j.png')}));
+
+  bigHead = new THREE.Mesh(new THREE.BoxGeometry(12, 18.5, 12.5),
+                       new THREE.MeshFaceMaterial(materials));
+  return bigHead;
+}
+function Head() {
+  var materials = [];
+  // must give 6 materials for box geometry
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/F2nhcSD.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/3LfstGv.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/I4Ew7Ji.png')}));
+  materials.push(new THREE.MeshLambertMaterial({visible:false}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/dME9p8W.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/i9AS5kZ.png')}));
+
+  bigHead = new THREE.Mesh(new THREE.BoxGeometry(25,16, 17),
+                       new THREE.MeshFaceMaterial(materials));
+  return bigHead;
+}
+function Leg() {
+  var leg = new THREE.Mesh(new THREE.BoxGeometry(5, 13, 8),
+                       new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  return leg;
+}
+function LidFB() {
+  var lid = new THREE.Object3D();
+  var drawLid = new THREE.Mesh(new THREE.PlaneGeometry(12, 7),
+                                new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  lid.add(drawLid);
+  return lid;
+}
+function LidRL() {
+  var lid = new THREE.Object3D();
+  var drawLid = new THREE.Mesh(new THREE.PlaneGeometry(12.5, 7),new 	THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  lid.add(drawLid);
+  lid.rotation.y = Math.PI/2;
+  return lid;
+}
+function Hand() {
+  var hand = new THREE.Mesh(new THREE.BoxGeometry(14, 5, 7),new 	THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  return hand; 
+}
+
+function handMoveJoint(){
+	var joint = new THREE.Object3D();
+	return joint;
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+
+function animate() {
+  controls.update();
+  var t = clock.getElapsedTime() % period;
+  var s = t / period; // normalized time
+  
+  if(turn){
+    for (var i = keys.length - 1; i >= 0; i--) {
+      if (s > keys[i].s)
+        break;
+    }
+    
+    var tt = (s - keys[i].s) / (keys[i + 1].s - keys[i].s);
+    var bodyToArmL1 = (1 - tt) * keys[i].pose.bodyToArmL + tt * keys[i + 1].pose.bodyToArmL;
+    var leftJoint1 = (1 - tt) * keys[i].pose.leftJoint + tt * keys[i + 1].pose.leftJoint;
+    var bodyToArm1 = (1 - tt) * keys[i].pose.bodyToArm + tt * keys[i + 1].pose.bodyToArm;
+    var rightJoint1 = (1 - tt) * keys[i].pose.rightJoint + tt * keys[i + 1].pose.rightJoint;
+    var bodyToLeftLeg1 = (1 - tt) * keys[i].pose.bodyToLeftLeg + tt * keys[i + 1].pose.bodyToLeftLeg;
+    var bodyToRightLeg1 = (1 - tt) * keys[i].pose.bodyToRightLeg + tt * keys[i + 1].pose.bodyToRightLeg;
+    var posi = (1 - tt) * keys[i].pose.posi+ tt * keys[i + 1].pose.posi;
+    bodyToArmL.rotation.x = bodyToArmL1;
+    leftJoint.rotation.z = leftJoint1;
+    bodyToArm.rotation.x = -bodyToArm1;
+    rightJoint.rotation.z = rightJoint1;
+    bodyToLeftLeg.rotation.z = bodyToLeftLeg1;
+    bodyToRightLeg.rotation.z = bodyToRightLeg1;
+    all.position.x= posi;
+		all.rotation.y = 0;
+ }
+  if(!turn){
+    bodyToLeftLeg.rotation.z = 0;
+    bodyToRightLeg.rotation.z = 0;
+    angle += 0.007;
+    var t = clock.getElapsedTime() % period;
+    var s = t / period; // normalized time
+  	for (var i = wKeys.length - 1; i >= 0; i--) {
+      if (s > wKeys[i].s)
+        break;
+    }
+    var tt = (s - wKeys[i].s) / (wKeys[i + 1].s - wKeys[i].s);
+    var bodyToArmL1 = (1 - tt) * wKeys[i].pose.bodyToArmL + tt * wKeys[i + 1].pose.bodyToArmL;
+    var leftJoint1 = (1 - tt) * wKeys[i].pose.leftJoint + tt * wKeys[i + 1].pose.leftJoint;
+    var bodyToArm1 = (1 - tt) * wKeys[i].pose.bodyToArm + tt * wKeys[i + 1].pose.bodyToArm;
+    var rightJoint1 = (1 - tt) * wKeys[i].pose.rightJoint + tt * wKeys[i + 1].pose.rightJoint;
+    var bodyToLeftLeg1 = (1 - tt) * wKeys[i].pose.bodyToLeftLeg + tt * wKeys[i + 1].pose.bodyToLeftLeg;
+    var bodyToRightLeg1 = (1 - tt) * wKeys[i].pose.bodyToRightLeg + tt * wKeys[i + 1].pose.bodyToRightLeg;
+    bodyToArmL.rotation.x = bodyToArmL1;
+    leftJoint.rotation.z = leftJoint1;
+    bodyToArm.rotation.x = bodyToArm1;
+    rightJoint.rotation.z = -rightJoint1;
+    bodyToLeftLeg.rotation.x = bodyToLeftLeg1;
+    bodyToRightLeg.rotation.x = -bodyToRightLeg1;
+    all.rotation.y = angle;
+}
+  if(turn1){
+    var cameraOffset = body.localToWorld (new THREE.Vector3(0,75,-100));
+    camera.position.copy(cameraOffset);
+    camera.lookAt(body.localToWorld (new THREE.Vector3(0,0,0)));
+  }
+  if(!turn1){
+  	camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.set(0,30,150);
+ 	}
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+</html>

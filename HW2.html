@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+
+
+</style>
+</head>
+
+<body> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
+<script>
+	var scene, renderer, camera;
+var controls;
+var bodyToArmL,armToHandL;
+var bodyToArm,armToHand;
+var bodyToLeftLeg,bodyToRightLeg;;
+var bodyToRightLid,bodyToLeftLid,bodyToBackwardLid, 	bodyToForwardLid;
+
+init();
+animate();
+
+function init() {
+	scene = new THREE.Scene();
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+  document.body.appendChild(renderer.domElement);
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.set(0,100,200);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+	var light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(150, 150, 150);
+  scene.add(light);
+  var light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(-150, -150, -150);
+  scene.add(light);
+  var amblight = new THREE.AmbientLight(0x404040); // soft white light
+  scene.add(amblight);
+  var gridXZ = new THREE.GridHelper(100, 10);
+  gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
+  scene.add(gridXZ);
+  
+  THREE.ImageUtils.crossOrigin = '';
+  meterial_colorwithbor = new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')});
+	
+  var all = new THREE.Object3D();
+	var body = Body();
+  body.position.set(-25,25,50);
+  all.add(body);
+  scene.add(all);
+
+  var head = Head();
+  bodyToHead = new THREE.Object3D();
+  bodyToHead.position.set(0, 15, 0);
+  body.add(bodyToHead);
+  bodyToHead.add(head);
+  
+  var leftLeg = Leg();
+  bodyToLeftLeg = new THREE.Object3D();
+  bodyToLeftLeg.position.set(-3, -13.5, 0);
+  leftLeg.position.set(0,-5,0);
+  bodyToLeftLeg.add(leftLeg);
+  body.add(bodyToLeftLeg);
+  
+  var rightLeg = Leg();
+  bodyToRightLeg = new THREE.Object3D();
+  bodyToRightLeg.position.set(3, -13.5, 0);
+  rightLeg.position.set(0,-5,0);
+  bodyToRightLeg.add(rightLeg);
+  body.add(bodyToRightLeg);
+
+  var lidForward = LidFB();
+  bodyToForwardLid = new THREE.Object3D();
+  bodyToForwardLid.position.set(0,-10,6);
+  lidForward.position.set(0,-2,0);
+  bodyToForwardLid.add(lidForward);
+  bodyToForwardLid.rotation.x = -Math.PI/12;  		
+  body.add(bodyToForwardLid);
+
+  var lidBackward = LidFB();
+  bodyToBackwardLid = new THREE.Object3D();
+  bodyToBackwardLid.position.set(0,-10,-6);
+  lidBackward.position.set(0,-2,0);
+  bodyToBackwardLid.add(lidBackward);
+  bodyToBackwardLid.rotation.x = Math.PI/12;  		
+  body.add(bodyToBackwardLid);
+
+  var lidLeft = LidRL();
+  bodyToLeftLid = new THREE.Object3D();
+  bodyToLeftLid.position.set(-6,-10, 0);
+  lidLeft.position.set(0,-2,0);
+  bodyToLeftLid.add(lidLeft);
+  bodyToLeftLid.rotation.z = -Math.PI/12;  		
+  body.add(bodyToLeftLid);
+
+  var lidRight = LidRL();
+  bodyToRightLid = new THREE.Object3D();
+  bodyToRightLid.position.set(6,-10, 0);
+  lidRight.position.set(0,-2,0);
+  bodyToRightLid.add(lidRight);
+  bodyToRightLid.rotation.z = Math.PI/12;  		
+  body.add(bodyToRightLid);
+  
+  rightJoint = handMoveJoint();
+  var rightHand = Hand();
+  bodyToArm =new THREE.Object3D();
+  bodyToArm.add(rightJoint);
+  bodyToArm.position.set(6,3,0);
+  armToHand =new THREE.Object3D();
+  rightJoint.add(armToHand);
+  armToHand.position.set(7,0,0);
+  armToHand.add(rightHand);
+  body.add(bodyToArm);
+  
+  leftJoint = handMoveJoint();
+  var leftHand = Hand();
+  bodyToArmL =new THREE.Object3D();
+  bodyToArmL.add(leftJoint);
+  bodyToArmL.position.set(-6,3,0);
+  armToHandL =new THREE.Object3D();
+  leftJoint.add(armToHandL);
+  armToHandL.position.set(-7,0,0);
+  armToHandL.add(leftHand);
+  body.add(bodyToArmL);
+  
+   gcontrols = {
+    Head: 0,//左右
+    HeadRL: 0,//上下
+    HeadX:0,
+    Leftarm: 0,
+    Lefthand:0,
+    Rightarm:0,
+    Righthand:0,
+    Leftleg:0,
+    Rightleg:0,
+    
+  }
+	var gui = new dat.GUI({load: loadALVIN(), preset: 'pose1'});
+	gui.remember (gcontrols);
+  gui.add(gcontrols, 'Head', -1, 1);
+  gui.add(gcontrols, 'HeadRL', -0.5, 0.5);
+  gui.add(gcontrols, 'HeadX' , -0.2,0.2);
+  gui.add(gcontrols, 'Leftarm', -1.5, 1.5);
+  gui.add(gcontrols, 'Lefthand', -0.5, 1);
+  gui.add(gcontrols, 'Rightarm', -1.5, 1.5);
+  gui.add(gcontrols, 'Righthand', -0.5, 1);
+  gui.add(gcontrols, 'Leftleg', -0.5, 1.5);
+  gui.add(gcontrols, 'Rightleg', -0.5, 1.5);
+}
+
+function Body(){
+  var materials = [];
+  // must give 6 materials for box geometry
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  materials.push(new THREE.MeshLambertMaterial({visible:false}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/1GIqcsD.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/Iw2qR7j.png')}));
+
+  bigHead = new THREE.Mesh(new THREE.BoxGeometry(12, 18.5, 12.5),
+                       new THREE.MeshFaceMaterial(materials));
+  return bigHead;
+}
+function Head() {
+  var materials = [];
+  // must give 6 materials for box geometry
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/F2nhcSD.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/3LfstGv.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/I4Ew7Ji.png')}));
+  materials.push(new THREE.MeshLambertMaterial({visible:false}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/dME9p8W.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/i9AS5kZ.png')}));
+
+  bigHead = new THREE.Mesh(new THREE.BoxGeometry(25,16, 17),
+                       new THREE.MeshFaceMaterial(materials));
+  return bigHead;
+}
+function Leg() {
+  var leg = new THREE.Mesh(new THREE.BoxGeometry(5, 13, 8),
+                       new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  return leg;
+}
+function LidFB() {
+  var lid = new THREE.Object3D();
+  var drawLid = new THREE.Mesh(new THREE.PlaneGeometry(12, 7),
+                                new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  lid.add(drawLid);
+  return lid;
+}
+function LidRL() {
+  var lid = new THREE.Object3D();
+  var drawLid = new THREE.Mesh(new THREE.PlaneGeometry(12.5, 7),new 	THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  lid.add(drawLid);
+  lid.rotation.y = Math.PI/2;
+  return lid;
+}
+function Hand() {
+  var hand = new THREE.Mesh(new THREE.BoxGeometry(14, 5, 7),new 	THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  return hand; 
+}
+
+function handMoveJoint(){
+	var joint = new THREE.Object3D();
+	return joint;
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function loadALVIN() {
+	return {  // must be return {    return \n { will become a new line
+    "preset": "Default",
+    "closed": false,
+    "remembered": {
+      "Default": {
+        "0": {
+          "Head": -0.024555197169909504,
+          "HeadRL": -0.024555197169909504,
+          "Leftarm": -0.0368327957548642,
+          "Lefthand": 0.2315836021225679,
+          "Rightarm": -0.0368327957548642,
+          "Righthand": 0.24784101550306936,
+          "Leftleg": -0.06646897651995981,
+          "Rightleg": -0.08814552769396183
+        }
+      },
+      "Pose1": {
+        "0": {
+          "Head": 0.2789165192661185,
+          "HeadRL": -0.024555197169909504,
+          "Leftarm": -0.1994069295598795,
+          "Lefthand": -0.5,
+          "Rightarm": -0.26443658308188556,
+          "Righthand": 0.24784101550306936,
+          "Leftleg": 1.0173585821801407,
+          "Rightleg": -0.08814552769396183
+        }
+      },
+      "Pose2": {
+        "0": {
+          "Head": -0.3280269136059377,
+          "HeadRL": -0.024555197169909504,
+          "Leftarm": -0.1994069295598795,
+          "Lefthand": 1,
+          "Rightarm": -0.0368327957548642,
+          "Righthand": 1,
+          "Leftleg": -0.5,
+          "Rightleg": -0.5
+        }
+      },
+      "Pose3": {
+        "0": {
+          "Head": -0.06790829951791355,
+          "HeadRL": -0.024555197169909504,
+          "Leftarm": -0.1994069295598795,
+          "Lefthand": -0.5,
+          "Rightarm": -0.0368327957548642,
+          "Righthand": -0.061049838726459305,
+          "Leftleg": 0.8439461727881246,
+          "Rightleg": 0.4104151493080844
+        }
+      }
+    },
+    "folders": {}
+  } ;
+}
+function animate() {
+  controls.update();
+  bodyToHead.rotation.y = gcontrols.Head;
+  bodyToHead.rotation.z = gcontrols.HeadRL;
+  bodyToHead.rotation.x = gcontrols.HeadX;
+  bodyToArmL.rotation.x = gcontrols.Leftarm;
+  bodyToArm.rotation.x = gcontrols.Rightarm;
+  leftJoint.rotation.z = gcontrols.Lefthand;
+  rightJoint.rotation.z = -gcontrols.Righthand;
+  bodyToRightLeg.rotation.x = gcontrols.Rightleg;
+  bodyToLeftLeg.rotation.x = gcontrols.Leftleg;
+  
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+</html>
