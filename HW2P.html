@@ -15,7 +15,6 @@
 body {
   overflow: hidden;
 }
-
 </style>
 </head>
 
@@ -31,14 +30,14 @@ body {
 <script src="//cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script>
-	var scene, renderer, camera;
+  var scene, renderer, camera;
 var controls;
 var all;
 var body;
 var bodyToArmL,armToHandL;
 var bodyToArm,armToHand;
 var bodyToLeftLeg,bodyToRightLeg;;
-var bodyToRightLid,bodyToLeftLid,bodyToBackwardLid, 	bodyToForwardLid;
+var bodyToRightLid,bodyToLeftLid,bodyToBackwardLid,   bodyToForwardLid;
 var clock = new THREE.Clock();
 var period = 2;
 var turn = false;
@@ -49,13 +48,11 @@ $("#walkDance").click(function() {
   if(turn) body.position.x =0;
   else body.position.x = -50;
 });
-
 $("#view").click(function() {
   turn1 = !turn1;
 });
-
 var pose1 = {
-		bodyToHead: -0.024555197169909504,
+    bodyToHead: -0.024555197169909504,
     bodyToArmL: -0.0368327957548642,
     leftJoint: -0.04479242534595773,
     bodyToArm: -0.10186244927687027,
@@ -64,7 +61,6 @@ var pose1 = {
     bodyToRightLeg: -0.0014393229979537403,
     posi:0
 };
-
 var pose2 = {
     bodyToHead: -0.024555197169909504,
     bodyToArmL: -0.0368327957548642,
@@ -75,9 +71,8 @@ var pose2 = {
     bodyToRightLeg: -0.0014393229979537403,
     posi:20
 };
-
 var pose3 = {
-  	bodyToHead: -0.024555197169909504,
+    bodyToHead: -0.024555197169909504,
     bodyToArmL: -0.0368327957548642,
     leftJoint: -0.04479242534595773,
     bodyToArm: -0.10186244927687027,
@@ -86,7 +81,6 @@ var pose3 = {
     bodyToRightLeg: -0.0014393229979537403,
     posi:0
 };
-
 var pose4 = {
     bodyToHead: -0.024555197169909504,
     bodyToArmL: 1.5,
@@ -98,7 +92,6 @@ var pose4 = {
     posi:-20
  
 };
-
 var pose5w ={
     bodyToHead: -0.024555197169909504,
     bodyToArmL: -0.6871293309749247,
@@ -108,7 +101,6 @@ var pose5w ={
     bodyToLeftLeg: -0.06646897651995981,
     bodyToRightLeg: -0.5
 };
-
 var pose6w ={
      bodyToHead: -0.024555197169909504,
      bodyToArmL: 0.45088960566018077,
@@ -118,7 +110,6 @@ var pose6w ={
      bodyToLeftLeg: -0.5,
      bodyToRightLeg: -0.030115874171955764
 };
-
 var pose7w ={
      bodyToHead: -0.024555197169909504,
      bodyToArmL: -0.2319217563208824,
@@ -128,27 +119,25 @@ var pose7w ={
      bodyToLeftLeg: -0.023115874171955764,
      bodyToRightLeg: -0.023115874171955764
 };
-
 var keys = [{s: 0,pose: pose1}, 
-						{s: 0.17,pose: pose2},{s: 0.34,pose: pose3}, 
+            {s: 0.17,pose: pose2},{s: 0.34,pose: pose3}, 
             {s: 0.51,pose: pose4},{s: 0.85,pose: pose2}, 
-						{s: 1,pose: pose1}];
+            {s: 1,pose: pose1}];
             
 var wKeys = [{s:0,pose: pose5w}, {s: 0.25,pose: pose7w},{s: 0.5,pose: pose6w},{s: 0.75,pose: pose7w},{s:1,pose: pose5w}];            
             
 init();
 animate();
-
 function init() {
-	scene = new THREE.Scene();
+  scene = new THREE.Scene();
   renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(0x888888);
   document.body.appendChild(renderer.domElement);
-	camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.set(0,50,100);
   controls = new THREE.OrbitControls(camera, renderer.domElement);
-	var light = new THREE.PointLight(0xffffff, 1);
+  var light = new THREE.PointLight(0xffffff, 1);
   light.position.set(150, 150, 150);
   scene.add(light);
   var light = new THREE.PointLight(0xffffff, 1);
@@ -162,13 +151,12 @@ function init() {
   
   THREE.ImageUtils.crossOrigin = '';
   meterial_colorwithbor = new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')});
-	
+  
   all = new THREE.Object3D();
-	body = Body();
+  body = Body();
   body.position.set(-50,25,0);
   all.add(body);
   scene.add(all);
-
   var head = Head();
   bodyToHead = new THREE.Object3D();
   bodyToHead.position.set(0, 15, 0);
@@ -188,37 +176,33 @@ function init() {
   rightLeg.position.set(0,-5,0);
   bodyToRightLeg.add(rightLeg);
   body.add(bodyToRightLeg);
-
   var lidForward = LidFB();
   bodyToForwardLid = new THREE.Object3D();
   bodyToForwardLid.position.set(0,-10,6);
   lidForward.position.set(0,-2,0);
   bodyToForwardLid.add(lidForward);
-  bodyToForwardLid.rotation.x = -Math.PI/12;  		
+  bodyToForwardLid.rotation.x = -Math.PI/12;      
   body.add(bodyToForwardLid);
-
   var lidBackward = LidFB();
   bodyToBackwardLid = new THREE.Object3D();
   bodyToBackwardLid.position.set(0,-10,-6);
   lidBackward.position.set(0,-2,0);
   bodyToBackwardLid.add(lidBackward);
-  bodyToBackwardLid.rotation.x = Math.PI/12;  		
+  bodyToBackwardLid.rotation.x = Math.PI/12;      
   body.add(bodyToBackwardLid);
-
   var lidLeft = LidRL();
   bodyToLeftLid = new THREE.Object3D();
   bodyToLeftLid.position.set(-6,-10, 0);
   lidLeft.position.set(0,-2,0);
   bodyToLeftLid.add(lidLeft);
-  bodyToLeftLid.rotation.z = -Math.PI/12;  		
+  bodyToLeftLid.rotation.z = -Math.PI/12;     
   body.add(bodyToLeftLid);
-
   var lidRight = LidRL();
   bodyToRightLid = new THREE.Object3D();
   bodyToRightLid.position.set(6,-10, 0);
   lidRight.position.set(0,-2,0);
   bodyToRightLid.add(lidRight);
-  bodyToRightLid.rotation.z = Math.PI/12;  		
+  bodyToRightLid.rotation.z = Math.PI/12;     
   body.add(bodyToRightLid);
   
   rightJoint = handMoveJoint();
@@ -243,7 +227,6 @@ function init() {
   armToHandL.add(leftHand);
   body.add(bodyToArmL);
 }
-
 function Body(){
   var materials = [];
   // must give 6 materials for box geometry
@@ -253,7 +236,6 @@ function Body(){
   materials.push(new THREE.MeshLambertMaterial({visible:false}));
   materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/1GIqcsD.png')}));
   materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/Iw2qR7j.png')}));
-
   bigHead = new THREE.Mesh(new THREE.BoxGeometry(12, 18.5, 12.5),
                        new THREE.MeshFaceMaterial(materials));
   return bigHead;
@@ -267,7 +249,6 @@ function Head() {
   materials.push(new THREE.MeshLambertMaterial({visible:false}));
   materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/dME9p8W.png')}));
   materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/i9AS5kZ.png')}));
-
   bigHead = new THREE.Mesh(new THREE.BoxGeometry(25,16, 17),
                        new THREE.MeshFaceMaterial(materials));
   return bigHead;
@@ -286,28 +267,24 @@ function LidFB() {
 }
 function LidRL() {
   var lid = new THREE.Object3D();
-  var drawLid = new THREE.Mesh(new THREE.PlaneGeometry(12.5, 7),new 	THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  var drawLid = new THREE.Mesh(new THREE.PlaneGeometry(12.5, 7),new   THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
   lid.add(drawLid);
   lid.rotation.y = Math.PI/2;
   return lid;
 }
 function Hand() {
-  var hand = new THREE.Mesh(new THREE.BoxGeometry(14, 5, 7),new 	THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
+  var hand = new THREE.Mesh(new THREE.BoxGeometry(14, 5, 7),new   THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/20rkTKY.png')}));
   return hand; 
 }
-
 function handMoveJoint(){
-	var joint = new THREE.Object3D();
-	return joint;
+  var joint = new THREE.Object3D();
+  return joint;
 }
-
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
-
-
 function animate() {
   controls.update();
   var t = clock.getElapsedTime() % period;
@@ -334,7 +311,7 @@ function animate() {
     bodyToLeftLeg.rotation.z = bodyToLeftLeg1;
     bodyToRightLeg.rotation.z = bodyToRightLeg1;
     all.position.x= posi;
-		all.rotation.y = 0;
+    all.rotation.y = 0;
  }
   if(!turn){
     bodyToLeftLeg.rotation.z = 0;
@@ -342,7 +319,7 @@ function animate() {
     angle += 0.007;
     var t = clock.getElapsedTime() % period;
     var s = t / period; // normalized time
-  	for (var i = wKeys.length - 1; i >= 0; i--) {
+    for (var i = wKeys.length - 1; i >= 0; i--) {
       if (s > wKeys[i].s)
         break;
     }
@@ -367,12 +344,14 @@ function animate() {
     camera.lookAt(body.localToWorld (new THREE.Vector3(0,0,0)));
   }
   if(!turn1){
-  	camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.set(0,30,150);
- 	}
+  }
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
 </script>
 </body>
 </html>
+Status API Training Shop Blog About
+© 2016 GitHub, Inc. Terms Privacy Security Contact Help
