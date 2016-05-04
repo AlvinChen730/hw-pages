@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+#info {
+  top:5%;
+  position: absolute;
+  color: yellow;
+  text-align: center;
+  width: 100%;
+}
+
+
+</style>
+</head>
+
+<body> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+<div id='info'>
+Mario playing remote car
+</div>
+<script>
+	var scene, renderer, camera;
+var controls;
+var toytrain;
+var bumpMap;
+var clock=new THREE.Clock();
+var angle=0;
+init();
+animate();
+
+function init()
+{
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+
+	renderer = new THREE.WebGLRenderer({antialias: true});
+	renderer.setSize (width, height);
+	renderer.setClearColor (0x888888);
+	document.body.appendChild (renderer.domElement);
+
+	scene = new THREE.Scene();
+
+	camera = new THREE.PerspectiveCamera (45, width/height, 1, 10000);
+	camera.position.y = 48;
+	camera.position.z = 120;
+	camera.lookAt (new THREE.Vector3(0,0,0));
+
+	controls = new THREE.OrbitControls (camera, renderer.domElement);
+  
+  var geometry1 = new THREE.BoxGeometry(5,15,3);
+  var material1 = new THREE.MeshBasicMaterial({color:0xccaabb});
+	plot = new THREE.Mesh(geometry1, material1);
+  plot.position.set(35,7.5,0);
+  scene.add(plot);
+  
+  THREE.ImageUtils.crossOrigin = ''; 
+  photoMap = THREE.ImageUtils.loadTexture('https://scontent-tpe1-1.xx.fbcdn.net/v/t1.0-9/10670259_659129860897733_8837841253775570241_n.jpg?oh=33d2d97009e44f35c146cae2c2e6f656&oe=57A2FBF3');
+  var geometry2 = new THREE.BoxGeometry(20,20,5);
+  var material2 = new THREE.MeshBasicMaterial({color:0xccaabb});
+	photobox = new THREE.Mesh(geometry2, material2);
+  photobox.material.map =photoMap;
+  photobox.position.set(35,25,0);
+  scene.add(photobox);
+
+	var gridXZ = new THREE.GridHelper(100, 10);
+	gridXZ.setColors( new THREE.Color(0xff0000), new THREE.Color(0xffffff) );
+	scene.add(gridXZ);
+
+	var pointLight = new THREE.PointLight (0xffffff);
+	pointLight.position.set (0,300,200);
+	scene.add (pointLight);
+
+	var ambientLight = new THREE.AmbientLight (0x111111);
+	scene.add(ambientLight);
+
+////////////////////////////////////////////////////////////////////
+	// load the clara.io toytrain
+   THREE.ImageUtils.crossOrigin = '';  // no space between a pair of single quotes
+
+	bumpMap = THREE.ImageUtils.loadTexture('https://raw.githubusercontent.com/AlvinChen730/hw-pages/gh-pages/models4/bodybkgd.JPG');
+	var loader = new THREE.ObjectLoader();
+  loader.load ('https://raw.githubusercontent.com/AlvinChen730/hw-pages/gh-pages/models4/1967-shelby-ford-mustang.json', 
+  function ( obj ) {
+  	toytrain = obj.clone();
+    toytrain.scale.set (2,2,2);
+    toytrain.position.set(0,0,0);
+    scene.add( toytrain );
+    toytrain.traverse (
+    	function (mesh) {
+      	if (mesh instanceof THREE.Mesh) {
+        	mesh.material.map =bumpMap;
+          mesh.material.bumpScale = 0.2;
+        }
+      });
+  });
+  bumpMap2 = THREE.ImageUtils.loadTexture('https://raw.githubusercontent.com/AlvinChen730/hw-pages/gh-pages/models5/marioD.jpg');
+	var loader2 = new THREE.ObjectLoader();
+  loader2.load ('https://raw.githubusercontent.com/AlvinChen730/hw-pages/gh-pages/models5/mario-sculpture.json', 
+  function ( obj ) {
+  	mario = obj.clone();
+    mario.scale.set (0.3,0.3,0.3);
+    mario.position.set(0,20,0);
+    scene.add( mario );
+    mario.traverse (
+    	function (mesh) {
+      	if (mesh instanceof THREE.Mesh) {
+        	mesh.material.map =bumpMap2;
+          mesh.material.bumpScale = 0.2;
+        }
+      });
+  });
+  
+	var loader3 = new THREE.ObjectLoader();
+  loader3.load ('https://raw.githubusercontent.com/AlvinChen730/hw-pages/gh-pages/models5/remote.json', 
+  function ( obj ) {
+  	remote = obj.clone();
+    remote.scale.set (0.08,0.08,0.08);
+    remote.position.set(-5,15,-12);
+    scene.add( remote );
+    remote.traverse (
+    	function (mesh) {
+      	if (mesh instanceof THREE.Mesh) {
+          mesh.material.bumpScale = 0.2;
+        }
+      });
+  });
+
+
+}
+
+function animate()
+{
+	controls.update();
+	var dt = clock.getDelta();
+
+	if (toytrain !== undefined) { 
+		toytrain.position.set (50*Math.cos(angle),0,- 50*Math.sin(angle));
+		toytrain.rotation.y = angle + Math.PI;
+		angle += dt;
+	}
+	
+  
+	requestAnimationFrame ( animate ); 
+	renderer.render (scene, camera);
+}
+
+</script>
+
+
+</body>
+
+</html>
