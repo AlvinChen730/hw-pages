@@ -58,11 +58,16 @@ function init()
   scene.add(plot);
   
   THREE.ImageUtils.crossOrigin = ''; 
-  photoMap = THREE.ImageUtils.loadTexture('https://scontent-tpe1-1.xx.fbcdn.net/v/t1.0-9/10670259_659129860897733_8837841253775570241_n.jpg?oh=33d2d97009e44f35c146cae2c2e6f656&oe=57A2FBF3');
-  var geometry2 = new THREE.BoxGeometry(20,20,5);
-  var material2 = new THREE.MeshBasicMaterial({color:0xccaabb});
-	photobox = new THREE.Mesh(geometry2, material2);
-  photobox.material.map =photoMap;
+  var materials = [];
+		 materials.push(new THREE.MeshBasicMaterial({color:0xccaabb}));
+     materials.push(new THREE.MeshBasicMaterial({color:0xccaabb}));
+     materials.push(new THREE.MeshBasicMaterial({color:0xccaabb}));
+     materials.push(new THREE.MeshBasicMaterial({color:0xccaabb}));
+     materials.push(new THREE.MeshBasicMaterial({color:0xccaabb}));
+     materials.push(new THREE.MeshBasicMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('https://scontent-tpe1-1.xx.fbcdn.net/v/t1.0-9/10670259_659129860897733_8837841253775570241_n.jpg?oh=33d2d97009e44f35c146cae2c2e6f656&oe=57A2FBF3')}));
+	photobox = new THREE.Mesh(new THREE.BoxGeometry(20,20,5),
+                       new THREE.MeshFaceMaterial(materials));
+  
   photobox.position.set(35,25,0);
   scene.add(photobox);
 
