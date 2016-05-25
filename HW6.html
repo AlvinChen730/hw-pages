@@ -57,7 +57,7 @@ body {
     varying vec3 eyelightdir;
     varying vec3 eyenormal;
     varying vec4 eyepos;
-    vec3 cool=vec3(0.1,1.0,0.6),warm=vec3(0.6,0.1,1.0),kdiffuse=vec3(0.3,0.3,0.3);
+    vec3 cool=vec3(0.0,0.0,1.0),warm=vec3(1.0,1.0,0.0),kdiffuse=vec3(0.3,0.3,0.3);
     float a=0.7,b=0.5;
     varying float transparent;
     void main() {
@@ -65,7 +65,7 @@ body {
         float intensity = dot (normalize (eyenormal), normalize (eyelightdir));    
         vec3 cdiff =cool+a*kdiffuse;
         vec3 wdiff =warm+b*kdiffuse;
-        vec3 final=((1.0+intensity)/2.0)*cdiff+(1.0-(1.0+intensity)/2.0)*wdiff;
+        vec3 final=((1.0+intensity)/2.0)*wdiff+(1.0-(1.0+intensity)/2.0)*cdiff;
         vec3 h = normalize(-normalize (eyepos.xyz) + normalize (eyelightdir));
         float shininess = 40.;    
         vec3 specular = pow (dot (eyenormal, h), shininess) *vec3 (1,0,0);
