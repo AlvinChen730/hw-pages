@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+#info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+
+body {
+  overflow: hidden;
+}
+
+
+</style>
+</head>
+
+<div id="info">HW1 Enter:engine start Space:engine stop </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js">
+
+
+</script>
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+
+
+<script>
+var camera, scene, renderer, controls;
+var keyboard = new KeyboardState();
+var cylinder;
+var brakeOn = false;
+
+var pos, vel, force;
+var angle = 0;
+var theta = 0;
+var toytrain;
+var origin;
+var go =false;
+
+//var power;
+var mass=1;
+var clock = new THREE.Clock();
+var power=0;
+init();
+animate();
+
+function init() {
+  scene = new THREE.Scene();
+  scene2 = new THREE.Scene();
+  
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+   scene.add(camera);
+  
+   camera2 = new THREE.OrthographicCamera(-20,20,20,-20,-20,200);
+   camera2.position.z = 100;
+   scene2.add(camera2);
+   
+   THREE.ImageUtils.crossOrigin = ''; 
+  dashboardMap = THREE.ImageUtils.loadTexture('http://i.imgur.com/WOQg9bT.png');
+   
+   var dashboard = new THREE.Mesh(new THREE.PlaneGeometry( 45, 45, 32 ),new THREE.MeshBasicMaterial( {side: THREE.DoubleSide,map:dashboardMap,transparent:true}));
+   scene2.add(dashboard);
+   
+  pointOrigin = new THREE.Mesh(new THREE.SphereGeometry(2, 28, 28),new THREE.MeshBasicMaterial( {color: 0xff0000} ));
+   
+  point = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 1, 15, 32),new THREE.MeshBasicMaterial( {color: 0xff0000} ));
+   pointOrigin.add(point);
+   pointOrigin.position.set(1,-1,0);
+   point.position.set(0,6,0);
+   
+
+   
+   scene2.add(pointOrigin);
+ 
+
+  var gridXZ = new THREE.GridHelper(100, 10);
+  gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
+  scene.add(gridXZ);
+  
+  
+  
+  THREE.ImageUtils.crossOrigin = ''; 
+  bumpMap = THREE.ImageUtils.loadTexture('https://raw.githubusercontent.com/AlvinChen730/hw-pages/gh-pages/models4/bodybkgd.JPG');
+  var loader = new THREE.ObjectLoader();
+  loader.load ('https://raw.githubusercontent.com/AlvinChen730/hw-pages/gh-pages/models4/1967-shelby-ford-mustang.json', 
+  function ( obj ) {
+    origin = new THREE.Object3D();
+    toytrain = obj.clone();
+    toytrain.scale.set (3,3,3);
+    toytrain.position.set(0,0,0);
+    toytrain.rotation.y = Math.PI/2;
+    origin.add( toytrain );
+    scene.add(origin);
+    toytrain.traverse (
+      function (mesh) {
+        if (mesh instanceof THREE.Mesh) {
+          mesh.material.map =bumpMap;
+          mesh.material.bumpScale = 0.8;
+        }
+      });
+  });
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  //////////////////////
+  pos = new THREE.Vector3();
+  vel = new THREE.Vector3();
+  force = new THREE.Vector3();
+  
+  document.body.appendChild(renderer.domElement);
+}
+
+
+function computeForce() {
+  //thrust
+  force = new THREE.Vector3(1,0,0).applyAxisAngle (new THREE.Vector3(0,1,0), angle-theta).multiplyScalar (power);    
+  
+  // drag
+  var alpha = 2.050;
+  force.add ( vel.clone().multiplyScalar (-alpha) );
+}
+
+
+function animate() {
+  keyboard.update();
+  if (keyboard.down("enter")){
+    theta=0;
+    go = true;
+  }
+  if (keyboard.down("space")) {
+      power = 0;
+      go =false;
+  }
+  if(go){
+    if (keyboard.pressed("right")){
+        theta+= 0.01;
+        if(theta>=Math.PI/8)
+          theta = Math.PI/8;
+    }
+    if (keyboard.pressed("left")){
+        theta-= 0.01;
+        if(theta<=-Math.PI/8)
+          theta = -Math.PI/8;
+    }
+    if (keyboard.pressed("up")){
+      power+= 0.5;
+      if(power>=180){
+        power=180
+      }
+    }
+    if (keyboard.pressed("down")){
+        power-= 0.5;
+        if(power<0){
+          power=0;
+        }
+  }
+}
+  
+  
+  computeForce();
+  var dt = clock.getDelta();  // delta-time
+  // vel = vel + force/mass * dt
+  vel.add (force.clone().multiplyScalar (dt/mass));
+  // pos = pos + vel * dt
+  pos.add (vel.clone().multiplyScalar (dt));
+  
+  if (vel.length() > 0.001) {
+    angle = Math.atan2 (-vel.z, vel.x);
+  }
+  
+  // copy to cylinder
+  if (origin !== undefined) { 
+    origin.position.copy (pos);
+    origin.rotation.y = angle ;
+   }
+   pointOrigin.rotation.z=Math.PI/1.5-Math.PI/120*power;
+  controls.update();
+  if (origin !== undefined){
+    camera.position.copy(origin.localToWorld(new THREE.Vector3(-100,50,0)));
+    camera.lookAt(origin.position);
+  }
+  requestAnimationFrame(animate);
+  render();
+}
+
+function render() {
+  renderer.render(scene, camera2);
+  var WW = window.innerWidth;
+  var HH = window.innerHeight;
+  renderer.clear();
+  renderer.enableScissorTest (true);
+  renderer.setScissor (0, 0, WW, HH);
+  renderer.setViewport(0, 0, WW , HH);
+  renderer.render(scene, camera);
+  renderer.setScissor (WW-WW/1.005, HH-HH/1.005, WW / 4, HH/3.5);
+  renderer.setViewport(WW-WW/1.005, HH-HH/1.005, WW / 4, HH/3.5);
+  renderer.render(scene2, camera2);
+  renderer.enableScissorTest (false);
+}
+
+// important to add this 
+// in jsfiddle!
+window.focus();
+
+
+</script>
+</body>
+</html>
