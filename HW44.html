@@ -145,7 +145,7 @@ var Agent = function(mesh, initPos) {
  	if(steertype ==1){
     var countFish =0;
     var fishPosition = new THREE.Vector3(0,0,0);
-    for(var i=0;i<objects.length;i++){
+    for(var i=0;i<6;i++){
       if(objects[i].pos.distanceTo(this.pos)<35){
         if(objects[i]!=this){
           fishPosition.add(objects[i].pos.clone());
@@ -155,14 +155,14 @@ var Agent = function(mesh, initPos) {
     }
     if(countFish>1){
       fishPosition.divideScalar(countFish);
-      tmp = this.pos.clone().sub(fishPosition);//.multiplyScalar(15);
-      this.vel.add(tmp.normalize());
+      fishPos = this.pos.clone().sub(fishPosition);//.multiplyScalar(15);
+      this.vel.add(fishPos.normalize());
     }
   }
   else if(steertype ==2){
     var countFish =0;
     var fishVel = new THREE.Vector3(0,0,0);
-    for(var i=0;i<objects.length;i++){
+    for(var i=0;i<6;i++){
       if(objects[i].pos.distanceTo(this.pos)<20){
         if(objects[i]!=this){
           fishVel.add(objects[i].pos.clone().sub(this.pos));
@@ -179,7 +179,7 @@ var Agent = function(mesh, initPos) {
   else if(steertype==3){
     var countFish =0;
     var fishVel = new THREE.Vector3(0,0,0);
-    for(var i=0;i<objects.length;i++){
+    for(var i=0;i<6;i++){
       if(objects[i].pos.distanceTo(this.pos)<20){
         if(objects[i]!=this){
           fishVel.add(objects[i].vel.clone());
@@ -256,8 +256,8 @@ function init() {
   var material = new THREE.MeshNormalMaterial();
   var box = new THREE.Mesh(geometry, material);
   
-  for(var i =0;i<5;i++){
-    tmp= new Agent(box.clone(),new THREE.Vector3(Math.floor((Math.random() * 200) + 1)-100,0,Math.floor((Math.random() * 200) + 1)-100));
+  for(var i =0;i<6;i++){
+    tmp= new Agent(box.clone(),new THREE.Vector3(Math.floor((Math.random() * 300) + 1)-100,0,Math.floor((Math.random() * 300) + 1)-150));
     
     
     objects.push(tmp);
@@ -311,14 +311,14 @@ function animate() {
     document.getElementById('group').innerHTML = "Group steer: No Method"
   }
     
-  for(var i=0;i<objects.length;i++)
+  for(var i=0;i<6;i++)
      objects[i].update(dt);// delta-time
 
     angle += targetOmega * dt;
 
     target.set (puck.position.x,puck.position.y,puck.position.z);
 
-   for(var i=0;i<objects.length;i++)
+   for(var i=0;i<6;i++)
      objects[i].setTarget(target);
   
   	controls.update();
