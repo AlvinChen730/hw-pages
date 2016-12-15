@@ -5,12 +5,12 @@
 <head>
 <style>
 	#info {
-	  position: absolute;
-	  top: 2%;
-	  width: 100%;
-	  padding: 10px;
-	  text-align: center;
-	  color: #ffff00
+  position: absolute;
+  top: 2%;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
 }
 
 body {
@@ -18,20 +18,22 @@ body {
 }
 
 
+
 </style>
 </head>
 
 <body> 
-	<div id="info">Baseball demo
-	<br/>
-	<button id="shoot" style="width:15%">start</button>
-	<br/>
-	</div>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r78/three.min.js"></script>
-	<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
-	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-	<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
+	<div id="info">
+  <br/>
+  <button id="shoot" style="width:15%">start</button>
+  <br/>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r78/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
+
 <script>
 	var scene, renderer, camera;
 var controls;
@@ -134,22 +136,34 @@ function init() {
 }
 
 function modeling(){
-	  //主頁面
+	  THREE.ImageUtils.crossOrigin = '';
+
+  //主頁面
   scene = new THREE.Scene();
   renderer = new THREE.WebGLRenderer();
-  renderer = new THREE.WebGLRenderer({
-    antialias: true
-  });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x888888);
+  renderer.setClearColor(0xBBFFFF);
   renderer.autoClear = false;
   document.body.appendChild(renderer.domElement);
   //主視角
+  
   camera = new THREE.PerspectiveCamera(4, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.set(-40,75, -750);
+
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  //光線
+	light = new THREE.PointLight(0xffffff);
+  light.position.set(0, 500, -500);
+  scene.add(light);
   
-  camera2 = new THREE.PerspectiveCamera(6, window.innerWidth / window.innerHeight, 1, 10000);
-  camera2.position.set(0, 10 , 210);
+  light = new THREE.PointLight(0xffffff);
+  light.position.set(0, 500, 500);
+  scene.add(light);
+  
+   camera2 = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 1, 10000);
+  camera2.position.set(0, 6 , 90);
   
   cameraHUD = new THREE.OrthographicCamera(-10, 10, 10, -10, -10, 100000);
   cameraHUD.position.z = 300;
@@ -177,91 +191,132 @@ function modeling(){
   fleft.position.set (10,0,0);
 	sceneHUD2.add(fright);
   sceneHUD2.add(fleft);
+  /*
+  light4 = new THREE.PointLight(0xffffff);
+  light4.position.set(-300, 300, -500);
+  scene.add(light4);
   
-  
-   
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
-  
-  //光線
-	light = new THREE.PointLight(0xffffff);
-  light.position.set(0, 500, -500);
-  scene.add(light);
-  
-  light = new THREE.PointLight(0xffffff);
-  light.position.set(0, 500, 500);
-  scene.add(light);
-
+  light5 = new THREE.PointLight(0xffffff);
+  light5.position.set(0, 300, 0);
+  scene.add(light5);
+*/
   /////////////////////////////////////////////////////////////////////////  
 
   //  1 單位 = 10公分 = 0.1公尺
   //	1公尺 = 10單位
 
-//球
-  THREE.ImageUtils.crossOrigin = '';
+  //球
   baseball = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), new THREE.MeshLambertMaterial({
-    side:THREE.DoubleSide,
+    side: THREE.DoubleSide,
     map: THREE.ImageUtils.loadTexture('https://i.imgur.com/ddu5eh4.jpg')
   }));
-	var baseballPos =baseball.localToWorld(new THREE.Vector3(0, 0, 0))
+  var baseballPos = baseball.localToWorld(new THREE.Vector3(0, 0, 0))
   baseball.position.copy(baseballPos);
 
   //球速度方向標示
-  velocityGeometry = new THREE.CylinderGeometry( 0.3,0.3, 5, 32 );
-	velocityMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} );
-	velocity = new THREE.Mesh( velocityGeometry , velocityMaterial );	
-  velocity.position.set(0,2.5,0);
-	velArrow=new THREE.Object3D();
+  velocityGeometry = new THREE.CylinderGeometry(0.3, 0.3, 5, 32);
+  velocityMaterial = new THREE.MeshLambertMaterial({
+    color: 0xff0000
+  });
+  velocity = new THREE.Mesh(velocityGeometry, velocityMaterial);
+  velocity.position.set(0, 2.5, 0);
+  velArrow = new THREE.Object3D();
   velArrow.add(velocity);
+  velArrow.position.set(0,500,0);
   scene.add(velArrow);
-	
+
   //求選轉方向標示
-  omegaGeometry = new THREE.CylinderGeometry( 0.3,0.3, 5, 32 );
-	omegaMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-	omega = new THREE.Mesh( omegaGeometry , omegaMaterial );
-  omega.position.set(0,2.5,0);
-  omegaArrow=new THREE.Object3D();
+  omegaGeometry = new THREE.CylinderGeometry(0.3, 0.3, 5, 32);
+  omegaMaterial = new THREE.MeshLambertMaterial({
+    color: 0xffff00
+  });
+  omega = new THREE.Mesh(omegaGeometry, omegaMaterial);
+  omega.position.set(0, 2.5, 0);
+  omegaArrow = new THREE.Object3D();
   omegaArrow.add(omega);
+  omegaArrow.position.set(0,500,0);
   scene.add(omegaArrow);
-  
+
   scene.add(baseball);
-  
+
+	//全場
+  grass = new THREE.Mesh(new THREE.PlaneGeometry(1200,1200), new THREE.MeshBasicMaterial({
+  	side: THREE.DoubleSide,
+    map: THREE.ImageUtils.loadTexture('https://i.imgur.com/lM5NGmP.jpg')
+  }));
+  grass.rotation.x = Math.PI/2;
+  grass.rotation.z = Math.PI/4;
+  grass.position.set(0,-0.5,-500);
+  scene.add(grass);
   
 
   //內野
   infield = new THREE.Mesh(new THREE.BoxGeometry(274.3, 0.1, 274.3), new THREE.MeshBasicMaterial({
-    color: 0x00ff00
+    map: THREE.ImageUtils.loadTexture('https://i.imgur.com/VRj6Sbl.jpg')
   }));
   infield.position.set(0, -193.9, 0);
   //投手丘
-  geometrymount = new THREE.CylinderGeometry( 1, 18.3, 4, 24 );
-	materialmount = new THREE.MeshBasicMaterial( {color: 0x796400} );
-	mount = new THREE.Mesh( geometrymount, materialmount );
-  mount.position.set (0,1.5, -184);
-	scene.add( mount );
+  geometrymount = new THREE.CylinderGeometry(1, 18.3, 4, 24);
+  materialmount = new THREE.MeshLambertMaterial({
+    color: 0x796400,
+    side: THREE.DoubleSide,
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')
+  });
+  mount = new THREE.Mesh(geometrymount, materialmount);
+  mount.position.set(0, 1.5, -184);
+  geometrymount2 = new THREE.CylinderGeometry(18.3, 18.3, 1, 32);
+  materialmount2 = new THREE.MeshLambertMaterial({
+    color: 0x796400,
+    side: THREE.DoubleSide,
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')
+  });
+  mount2 = new THREE.Mesh(geometrymount2, materialmount2);
+  mount2.position.set(0, 0, -184);
+  scene.add(mount);
+  //scene.add(mount2);
 
 
   geometry = new THREE.BoxGeometry(3.8, 1, 3.8);
   material = new THREE.MeshLambertMaterial({
     color: 0xffffff,
-    side: THREE.DoubleSide
-  });
-		
+    side: THREE.DoubleSide});
 
-  
+
+
   //一壘
   base1 = new THREE.Mesh(geometry, material);
   base1.position.set(135.3, 0, -137.4);
   infield.add(base1);
+  geometrycircle = new THREE.CircleGeometry(30, 32);
+  materialcircle = new THREE.MeshLambertMaterial({
+    color: 0x796400,
+    side: THREE.DoubleSide,
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')
+  });
+  base1floor = new THREE.Mesh(geometrycircle, materialcircle);
+  base1floor.rotation.x = Math.PI / 2;
+  base1floor.position.set(135.3, 0.2, -137.4);
+  infield.add(base1floor);
+  
 
   //二壘
   base2 = new THREE.Mesh(geometry, material);
   base2.position.set(-137.4, 0, -137.4);
   infield.add(base2);
+  base2floor = new THREE.Mesh(geometrycircle, materialcircle);
+  base2floor.rotation.x = Math.PI / 2;
+  base2floor.position.set(-137.4, 0.2, -137.4);
+  infield.add(base2floor);
 
   //三壘
   base3 = new THREE.Mesh(geometry, material);
-  base3.position.set(-137.4, 0, 137.4);
+  base3.position.set(-137.4, 0, 137.3);
   infield.add(base3);
+  base3floor = new THREE.Mesh(geometrycircle, materialcircle);
+  base3floor.rotation.x = Math.PI / 2;
+  base3floor.position.set(-137.4, 0.2, 137.4);
+  infield.add(base3floor);
+  
 
   //本壘
   homebase = new THREE.Object3D();
@@ -276,76 +331,219 @@ function modeling(){
   homebase.rotation.y = Math.PI / 4;
   infield.add(homebase);
 	
+  
+  
   //本壘打擊區
-  geometrycircle = new THREE.CircleGeometry(20,32);
+ 	geometrycircle = new THREE.CircleGeometry(60, 32);
+  home = new THREE.Mesh(geometrycircle, materialcircle);
+  home.rotation.x = Math.PI / 2;
+  home.position.set(135, 0.2, 135);
+  infield.add(home);
+  geometrycircle = new THREE.CircleGeometry(61, 32, -Math.PI / 2 + 0.05, 4.6);
   materialcircle = new THREE.MeshLambertMaterial({
-    color: 0x796400,
+    color: 0xffffff,
     side: THREE.DoubleSide
   });
-  home = new THREE.Mesh(geometrycircle, materialcircle);
-	home.rotation.x=Math.PI/2;
-  home.position.set (135,0.1,135);
-  infield.add(home);
-  
+  home2 = new THREE.Mesh(geometrycircle, materialcircle);
+  home2.rotation.x = Math.PI / 2;
+  home2.position.set(135, 0.1, 135);
+  infield.add(home2);
+	
   //好球帶
-  curve0= new THREE.SplineCurve3( [
-	new THREE.Vector3( -2.5,0,0),
-	new THREE.Vector3( 2.5,0,0),
-	new THREE.Vector3( 2.5,7,0),
-	new THREE.Vector3( -2.5,7,0),
-  new THREE.Vector3( -2.5,0,0)
-] );
+  curve0 = new THREE.SplineCurve3([
+    new THREE.Vector3(-2.5, 0, 0),
+    new THREE.Vector3(2.5, 0, 0),
+    new THREE.Vector3(2.5, 7, 0),
+    new THREE.Vector3(-2.5, 7, 0),
+    new THREE.Vector3(-2.5, 0, 0)
+  ]);
   geometrystrikerange = new THREE.Geometry();
   geometrystrikerange.vertices = curve0.getPoints(4);
-	materialstrikerange = new THREE.LineBasicMaterial( { color : 0xff0000 } );
-  strikeranger = new THREE.Line( geometrystrikerange, materialstrikerange );
-  strikeranger.position.set (0,4,0);
+  materialstrikerange = new THREE.LineBasicMaterial({
+    color: 0xff0000
+  });
+  strikeranger = new THREE.Line(geometrystrikerange, materialstrikerange);
+  strikeranger.position.set(0, 4, 0);
   scene.add(strikeranger);
-  
+	
   //左打擊格
- 	curve = new THREE.SplineCurve3( [
-	new THREE.Vector3( 2,0.5,-4),
-	new THREE.Vector3( 2,0.5,10 ),
-	new THREE.Vector3( 8,0.5,10),
-	new THREE.Vector3( 8,0.5,-4 ),
-  new THREE.Vector3( 2,0.5,-4)
-] );
+  curve = new THREE.SplineCurve3([
+    new THREE.Vector3(0, 0.5, -6),
+    new THREE.Vector3(0, 0.5, 12),
+    new THREE.Vector3(9, 0.5, 12),
+    new THREE.Vector3(9, 0.5, -6),
+    new THREE.Vector3(0, 0.5, -6)
+  ]);
   geometrycurve = new THREE.Geometry();
   geometrycurve.vertices = curve.getPoints(4);
-	materialcurve = new THREE.LineBasicMaterial( { color : 0xffffff } );
-  splineObject0 = new THREE.Line( geometrycurve, materialcurve );
-  splineObject0.position.set (1,0,-6);
+  materialcurve = new THREE.LineBasicMaterial({
+    color: 0xffffff
+  });
+  splineObject0 = new THREE.Line(geometrycurve, materialcurve);
+  splineObject0.position.set(3, 0, -5);
   scene.add(splineObject0);
   //右打擊格
- 
-  splineObject1 = new THREE.Line( geometrycurve, materialcurve );
-  splineObject1.position.set (-11,0,-6);
+
+  splineObject1 = new THREE.Line(geometrycurve, materialcurve);
+  splineObject1.position.set(-12, 0, -5);
   scene.add(splineObject1);
+
+ 	//一壘準備區
   
-  //捕手位置
-  splineObject2 = new THREE.Line( geometrycurve, materialcurve );
-  splineObject2.position.set (-6,0,5);
-  //scene.add(splineObject2);
+  base1preparation = new THREE.Mesh( new THREE.PlaneGeometry(200,1020),  new THREE.MeshLambertMaterial( {color: 0x796400,
+    side: THREE.DoubleSide,    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')}));
+  base1preparation.position.set(240, 0.05, -265);
+  base1preparation.rotation.x = -Math.PI/2;
+  infield.add(base1preparation);
   
+  base3preparation = new THREE.Mesh( new THREE.PlaneGeometry(200,1020),  new THREE.MeshLambertMaterial( {color: 0x796400,
+    side: THREE.DoubleSide,    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')}));
+  base3preparation.position.set( -265, 0.04, 240);
+  base3preparation.rotation.x = Math.PI/2;
+  base3preparation.rotation.z = Math.PI/2;
   
+  infield.add(base3preparation);
+
+
   //壘包線本壘至一壘
-  geometryline = new THREE.BoxGeometry(264, 0.2, 0.5);
+  geometryline = new THREE.BoxGeometry(900, 0.5, 1);
+  material = new THREE.MeshBasicMaterial( { color: 0xffffff,side:THREE.DoubleSide } );
   baseline1 = new THREE.Mesh(geometryline, material);
-  baseline1.rotation.y=Math.PI/2;
-  baseline1.position.set(137.3,0.1,-7.5);
+  baseline1.rotation.y = Math.PI / 2;
+  baseline1.position.set(137.3, 0, -330);
   infield.add(baseline1);
-  
-  
+	//跑道
+  runwaygeometry = new THREE.BoxGeometry(900, 0.15, 20 );
+  runwaymaterial = new THREE.MeshLambertMaterial( {color: 0x796400,
+    side: THREE.DoubleSide,
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg') } );
+  runway1 = new THREE.Mesh(runwaygeometry, runwaymaterial);
+  runway1.rotation.y = Math.PI / 2;
+  runway1.position.set(137.3, 0, -315);
+  infield.add(runway1);  
+
   //壘包線本壘至三壘
-  geometryline = new THREE.BoxGeometry(264, 0.2, 0.5);
   baseline2 = new THREE.Mesh(geometryline, material);
-  baseline2.position.set(-7.5,0.1,137.3);
+  baseline2.position.set(-330, 0, 137.3);
   infield.add(baseline2);
+  //跑道
+  runway2 = new THREE.Mesh(runwaygeometry, runwaymaterial);
+  //runway2.rotation.y = Math.PI / 2;
+  runway2.position.set(-315, 0, 137.3);
+  infield.add(runway2);
   
+  //外野
+  
+  geometry = new THREE.CircleGeometry( 900, 64, Math.PI ,Math.PI/2 );
+  outfield  = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial({
+    map: THREE.ImageUtils.loadTexture('https://i.imgur.com/sht0P3U.jpg'),
+    side: THREE.DoubleSide
+  }) );
+  outfield.rotation.z = Math.PI/4;
+  outfield.rotation.x = Math.PI/2; 
+  outfield.position.set( 0, -0.2, 50);
+  scene.add( outfield );
+  
+  //全壘打牆
+  outfieldwall = new THREE.Mesh( new THREE.CylinderGeometry( 900, 900, 30, 64, 9, true, Math.PI/1.4725 ,Math.PI/1.558 ), new THREE.MeshBasicMaterial({
+  color: 0x999999,
+    side: THREE.DoubleSide,
+    //map: THREE.ImageUtils.loadTexture('https://i.imgur.com/wYfhasR.jpg')
+  }) );
+  outfieldwall.position.set( 0, 15, 0);
+  scene.add( outfieldwall );
+ 
+  //本壘後方
+  homebasebackward =  new THREE.Mesh( new THREE.CylinderGeometry( 350, 350, 30, 64, 9, true, -0.55, Math.PI/2.85 ), new THREE.MeshBasicMaterial({
+  	color: 0xCCCCCC,
+    side: THREE.DoubleSide,
+     map: THREE.ImageUtils.loadTexture('https://i.imgur.com/Ta41OXk.jpg')
+  }) );
+  homebasebackward.position.set( 0, 15, -200);
+  scene.add(homebasebackward);
+  
+  homebasebackward2 =  new THREE.Mesh( new THREE.CylinderGeometry( 350, 350, 100, 64, 9, true, -0.55, Math.PI/2.85 ), new THREE.MeshBasicMaterial({
+    transparent: true,
+    side: THREE.DoubleSide,
+     map: THREE.ImageUtils.loadTexture('https://i.imgur.com/fihD9tq.png')
+  }) );
+  homebasebackward2.position.set( 0, 80, -200);
+  scene.add(homebasebackward2);
+  
+  //柱子
+  pillar =  new THREE.Mesh( new THREE.CylinderGeometry(5, 5, 150, 64), new THREE.MeshBasicMaterial({
+   color:0x000000
+  }));
+  
+  pillar.position.set(185, 75, 95);
+  scene.add(pillar);
+  
+  pillar2 = pillar.clone();
+  pillar2.position.set(-185, 75, 95);
+  scene.add(pillar2);
+  
+  pillar3 = pillar.clone();
+  pillar3.position.set(760, 75, -480);
+  scene.add(pillar3);
+  
+  pillar4 = pillar.clone();
+  pillar4.position.set(-760, 75, -480);
+  scene.add(pillar4);
+  
+  //一壘牆
+  base1wall = new THREE.Mesh( new THREE.PlaneGeometry(820,30 ), new THREE.MeshBasicMaterial({
+  color: 0xCCCCCC,
+    side: THREE.DoubleSide
+  }));
+  base1wall.rotation.y = Math.PI/2;
+  base1wall.position.set(335, 15, -330);
+  infield.add(base1wall);
+  
+  base1wall2 = new THREE.Mesh( new THREE.PlaneGeometry(810,100 ), new THREE.MeshBasicMaterial({
+   transparent: true,
+    side: THREE.DoubleSide,
+    map: THREE.ImageUtils.loadTexture('https://i.imgur.com/fihD9tq.png')
+  }));
+  base1wall2.rotation.y = Math.PI/2;
+  base1wall2.position.set(335, 80, -330);
+  infield.add(base1wall2);
+  
+  
+  //三壘牆
+  base3wall = new THREE.Mesh( new THREE.PlaneGeometry(820,30 ),new THREE.MeshBasicMaterial({ 
+  color: 0xCCCCCC,
+    side: THREE.DoubleSide
+  })); 
+  base3wall.position.set( -330, 15, 335);
+  infield.add(base3wall);
+  
+   base3wall2 = new THREE.Mesh( new THREE.PlaneGeometry(810,100 ), new THREE.MeshBasicMaterial({
+ transparent: true,
+    side: THREE.DoubleSide,
+    map: THREE.ImageUtils.loadTexture('https://i.imgur.com/fihD9tq.png')
+  }));
+  base3wall2.position.set( -330, 80, 335);
+  infield.add(base3wall2);
+  	
+  
+  
+  //野區
+  geometry = new THREE.CircleGeometry( 480, 64, Math.PI ,Math.PI/2 );
+  diamond = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({
+    color: 0x796400,
+    side: THREE.DoubleSide,
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')
+  }) );
+  diamond.rotation.z = Math.PI/4;
+  diamond.rotation.x = Math.PI/2; 
+  diamond.position.set( 0, -0.1, 50);
+  scene.add( diamond );
+  
+
   ///投球機
   pitchmachine = new THREE.Object3D();
   pitchpedestal = new THREE.Mesh(new THREE.BoxGeometry(5, 8, 5), new THREE.MeshLambertMaterial({
-    color: 0x00ffff, 
+    color: 0x00ffff,
     side: THREE.DoubleSide
   }));
   pitchpedestal.position.set(0, 4, 0);
@@ -359,17 +557,17 @@ function modeling(){
   connectA.position.set(0, 4.75, 0);
   pitchpedestal.add(connectA);
 
-  pitcharmA = new THREE.Mesh(new THREE.CylinderGeometry( 1, 1, 5, 64, 64 ), new THREE.MeshLambertMaterial({
+  pitcharmA = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 5, 64, 64), new THREE.MeshLambertMaterial({
     color: 0xffff00,
     side: THREE.DoubleSide
   }));
   pitcharmA.position.set(0, 3.25, 0);
   connectA.add(pitcharmA);
 
-	endEffector = new THREE.Object3D();
+  endEffector = new THREE.Object3D();
   endEffector.position.set(0, 3.25, 0);
   pitcharmA.add(endEffector);
-  
+
   connectB = new THREE.Mesh(new THREE.SphereGeometry(1.5, 32, 32), new THREE.MeshLambertMaterial({
     color: 0xff00ff,
     side: THREE.DoubleSide
@@ -377,15 +575,15 @@ function modeling(){
   endEffector.add(connectB);
 
 
-  pitcharmB = new THREE.Mesh(new THREE.CylinderGeometry( 1, 1, 5, 64, 64 ), new THREE.MeshLambertMaterial({
+  pitcharmB = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 5, 64, 64), new THREE.MeshLambertMaterial({
     color: 0xffff00,
     side: THREE.DoubleSide
   }));
   pitcharmB.position.set(0, 3.25, 0);
   connectB.add(pitcharmB);
 
-	//
-  pitchmachine.position.set(8,0,8);
+  //
+  pitchmachine.position.set(8, 0, 8);
   pitchmachine.rotation.y = -Math.PI / 4;
   infield.add(pitchmachine);
   infield.position.set(0, 0, -193.9);
@@ -461,11 +659,12 @@ function flightOfBall(){
   if(s > 0.4&&s < 0.6){     		
         if(turn2 === true){
         	dt = (clock.oldTime - clock.startTime)/ 1000; 
-  				
+  		
         }  
     }
   if(s>0.97){    
   	  turn2 =false;
+      
   }
     
    if(connectBB > 0){
@@ -575,6 +774,7 @@ function update (dt) {
   	return;
   }
   baseball.position.set (pos.x, pos.y, pos.z);
+ 
   velArrow.position.copy(baseball.position);
   redVector = new THREE.Vector3( 0, 1, 0 );
   angle = redVector.angleTo (vel);
@@ -586,6 +786,7 @@ function update (dt) {
   
   /// omega
   if (typeof velold !== "undefined") {
+  
     omegaArrow.position.copy(baseball.position);
     angle=vel.angleTo(velold);
     axis.crossVectors(velold,vel).normalize();
@@ -596,6 +797,7 @@ function update (dt) {
   else {
   	velold = new THREE.Vector3();
   }
+
   velold.copy (vel);
 	angle+=0.1;
   baseball.rotateOnAxis(axis,angle);
@@ -614,6 +816,7 @@ function render() {
 
   
 }
+
 
 </script>
 </body>
