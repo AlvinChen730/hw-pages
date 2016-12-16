@@ -260,7 +260,7 @@ function modeling(){
   materialmount = new THREE.MeshLambertMaterial({
     color: 0x796400,
     side: THREE.DoubleSide,
-    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg')
   });
   mount = new THREE.Mesh(geometrymount, materialmount);
   mount.position.set(0, 1.5, -184);
@@ -268,7 +268,7 @@ function modeling(){
   materialmount2 = new THREE.MeshLambertMaterial({
     color: 0x796400,
     side: THREE.DoubleSide,
-    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg
   });
   mount2 = new THREE.Mesh(geometrymount2, materialmount2);
   mount2.position.set(0, 0, -184);
@@ -291,7 +291,7 @@ function modeling(){
   materialcircle = new THREE.MeshLambertMaterial({
     color: 0x796400,
     side: THREE.DoubleSide,
-    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg')
   });
   base1floor = new THREE.Mesh(geometrycircle, materialcircle);
   base1floor.rotation.x = Math.PI / 2;
@@ -391,13 +391,13 @@ function modeling(){
  	//一壘準備區
   
   base1preparation = new THREE.Mesh( new THREE.PlaneGeometry(200,1020),  new THREE.MeshLambertMaterial( {color: 0x796400,
-    side: THREE.DoubleSide,    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')}));
+    side: THREE.DoubleSide,    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg
   base1preparation.position.set(240, 0.05, -265);
   base1preparation.rotation.x = -Math.PI/2;
   infield.add(base1preparation);
   
   base3preparation = new THREE.Mesh( new THREE.PlaneGeometry(200,1020),  new THREE.MeshLambertMaterial( {color: 0x796400,
-    side: THREE.DoubleSide,    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')}));
+    side: THREE.DoubleSide,    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg')}));
   base3preparation.position.set( -265, 0.04, 240);
   base3preparation.rotation.x = Math.PI/2;
   base3preparation.rotation.z = Math.PI/2;
@@ -416,7 +416,7 @@ function modeling(){
   runwaygeometry = new THREE.BoxGeometry(900, 0.15, 20 );
   runwaymaterial = new THREE.MeshLambertMaterial( {color: 0x796400,
     side: THREE.DoubleSide,
-    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg') } );
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg') } );
   runway1 = new THREE.Mesh(runwaygeometry, runwaymaterial);
   runway1.rotation.y = Math.PI / 2;
   runway1.position.set(137.3, 0, -315);
@@ -532,7 +532,7 @@ function modeling(){
   diamond = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({
     color: 0x796400,
     side: THREE.DoubleSide,
-    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/iOtDQu9.jpg')
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg')
   }) );
   diamond.rotation.z = Math.PI/4;
   diamond.rotation.x = Math.PI/2; 
@@ -809,14 +809,13 @@ function render() {
 	renderer.clear();
   renderer.setViewport(0, 0, WW , HH);
   renderer.render(scene, camera);
-  renderer.setViewport(WW-WW/1.005, HH-HH/3, WW / 3, HH/3);
+  renderer.setViewport(WW-WW/1.005, HH-HH/4, WW / 4, HH/4);
   renderer.render(sceneHUD, cameraHUD);
   renderer.render(sceneHUD2, cameraHUD);
   renderer.render(scene, camera2);
 
   
 }
-
 
 </script>
 </body>
